@@ -4,7 +4,7 @@ import Widget from '../../components/Widget'
 
 import './loginPage.css'
 
-import { NotificacaoContext } from '../../contexts/NotificacaoContext'  
+// import { NotificacaoContext } from '../../contexts/NotificacaoContext'  
 
 class LoginPage extends Component {
 
