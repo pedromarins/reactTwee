@@ -1,12 +1,16 @@
 import React, { Component, Fragment } from 'react'
+import { Helmet } from 'react-helmet'
+
 import Cabecalho from '../../components/Cabecalho'
 import Widget from '../../components/Widget'
 
 import './loginPage.css'
 
-// import { NotificacaoContext } from '../../contexts/NotificacaoContext'  
+import { NotificacaoContext } from '../../contexts/NotificacaoContext'  
+import { LoginService } from "../../services/LoginService"
 
 class LoginPage extends Component {
+    static contextType = NotificacaoContext
 
     fazerLogin = (infosDoEvento) => {
         infosDoEvento.preventDefault();
@@ -16,41 +20,23 @@ class LoginPage extends Component {
             senha: this.refs.inputSenha.value
         };
 
-        fetch("https://twitelum-api.herokuapp.com/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(dadosDeLogin)
-        })
-        .then(async responseDoServer => {
-            if (!responseDoServer.ok) {
-                const respostaDeErroDoServidor = await responseDoServer.json();
-                const errorObj = Error(respostaDeErroDoServidor.message);
-                errorObj.status = responseDoServer.status;
-                throw errorObj;
-            }
-
-            return responseDoServer.json();
-        })
-
-        .then(dadosDoServidorEmObj => {
-            const token = dadosDoServidorEmObj.token;
-
-            if (token) {
-                console.log(token)
-                localStorage.setItem("TOKEN", token);
+        LoginService.logar(dadosDeLogin)
+            .then(() => {
+                this.context.setMsg("Bem vindo ao Twitelum, login foi um sucesso!");
                 this.props.history.push("/");
-            }
-        })
-        .catch(err => {
-            console.error(`[Erro ${err.status}]`, err.message);
-        });
+            })
+            .catch(err => {
+                console.error(`[Erro ${err.status}]`, err.message);
+            });
     }
 
     render() {
         return (
             <Fragment>
+                <Helmet>
+                    <title>Twitelum - Login</title>
+                </Helmet>
+
                 <Cabecalho />
                 <div className="loginPage">
                     <div className="container">
