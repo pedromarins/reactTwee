@@ -12,6 +12,8 @@ import { TweetsService } from "../../services/TweetsService";
 
 import { ReactReduxContext } from "react-redux";
 
+import { TweetsThunkActions } from "../../stores/ducks/tweets"
+
 class HomePage extends Component {
     static contextType = ReactReduxContext;
 
@@ -29,13 +31,14 @@ class HomePage extends Component {
 
         store.subscribe(() => {
             this.setState({
-                tweets: store.getState()
+                tweets: store.getState().tweets.data
             })
         })
 
-        TweetsService
-            .carrega()
-            .then(tweets => {store.dispatch({ type: 'CARREGA_TWEETS', tweets });})
+        store.dispatch(TweetsThunkActions.carregaTweets());
+        // TweetsService
+        //     .carrega()
+        //     .then(tweets => {store.dispatch({ type: 'CARREGA_TWEETS', tweets });})
     }
 
     adicionaTweet = (infosDoEvento) => {
