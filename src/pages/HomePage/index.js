@@ -6,6 +6,7 @@ import Dashboard from '../../components/Dashboard'
 import Widget from '../../components/Widget'
 import TrendsArea from '../../components/TrendsArea'
 import Tweet from '../../components/Tweet'
+import Modal  from '../../components/Modal'
 
 
 class HomePage extends Component {
@@ -13,7 +14,8 @@ class HomePage extends Component {
         super();
         this.state = {
             novoTweet: "",
-            tweets: []
+            tweets: [],
+            tweetAtivoNoModal: {}
         }
     }
 
@@ -50,6 +52,33 @@ class HomePage extends Component {
             })
         }
     }
+
+    removeTweet(idTweetQueVaiSerRemovido) {
+        console.log(idTweetQueVaiSerRemovido)
+        fetch(
+            `https://twitelum-api.herokuapp.com/tweets/${idTweetQueVaiSerRemovido}?X-AUTH-TOKEN=${localStorage.getItem('TOKEN')}`, 
+            { method: 'DELETE' })
+            .then((data) => data.json())
+            .then((response) => {
+                console.log(response)
+                const listaDeTweetsAtualizada = this.state.tweets.filter( (tweet) => tweet._id !== idTweetQueVaiSerRemovido )
+                this.setState({
+                    tweets: listaDeTweetsAtualizada
+                });
+                this.fechaModal()
+            }
+        )
+    }
+
+    abreModal = (tweetQueVaiProModal) => {
+        this.setState({
+            tweetAtivoNoModal: tweetQueVaiProModal
+        }, () => {
+            console.log(this.state.tweetAtivoNoModal)
+        })
+    }
+
+    fechaModal = () => this.setState({ tweetAtivoNoModal: {} });
 
     render() {
         return (
@@ -94,8 +123,14 @@ class HomePage extends Component {
                                     (tweetInfo) => 
                                         <Tweet 
                                             key={tweetInfo._id}
+                                            id={tweetInfo._id}
                                             texto={tweetInfo.conteudo}
                                             usuario={tweetInfo.usuario}
+                                            likeado={tweetInfo.likeado}
+                                            totalLikes={tweetInfo.totalLikes}
+                                            removivel={tweetInfo.removivel}
+                                            removeHandler={() => this.removeTweet(tweetInfo._id)}
+                                            onClickNaAreaDeConteudo={() => this.abreModal(tweetInfo)}
                                         />
                                     )
                                 }
@@ -103,6 +138,23 @@ class HomePage extends Component {
                         </Widget>
                     </Dashboard>
                 </div>
+
+                <Modal
+                    isAberto={Boolean(this.state.tweetAtivoNoModal._id)}
+                    onFechando={this.fechaModal}
+                >
+                    {() => (
+                        <Tweet
+                            id={this.state.tweetAtivoNoModal._id}
+                            usuario={this.state.tweetAtivoNoModal.usuario}
+                            texto={this.state.tweetAtivoNoModal.conteudo}
+                            likeado={this.state.tweetAtivoNoModal.likeado}
+                            totalLikes={this.state.tweetAtivoNoModal.totalLikes}
+                            removivel={this.state.tweetAtivoNoModal.removivel}
+                            removeHandler={() => this.removeTweet(this.state.tweetAtivoNoModal._id)}
+                        />
+                    )}
+                </Modal>
             </Fragment>
         );
     }

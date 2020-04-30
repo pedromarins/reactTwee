@@ -36,3 +36,15 @@
 .tweet__footer {
   margin-top: 10px;
 }
+
+.btn--blue {
+  display: none;
+}
+
+.tweet:hover .btn--blue {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  right: 20px;
+  cursor: pointer;
+}
