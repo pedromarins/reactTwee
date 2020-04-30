@@ -8,8 +8,13 @@ import TrendsArea from '../../components/TrendsArea'
 import Tweet from '../../components/Tweet'
 import Modal  from '../../components/Modal'
 
+import { TweetsService } from "../../services/TweetsService";
+
+import { ReactReduxContext } from "react-redux";
 
 class HomePage extends Component {
+    static contextType = ReactReduxContext;
+
     constructor() {
         super();
         this.state = {
@@ -20,45 +25,35 @@ class HomePage extends Component {
     }
 
     componentDidMount() {
-        fetch(`https://twitelum-api.herokuapp.com/tweets?X-AUTH-TOKEN=${localStorage.getItem('TOKEN')}`)
-            .then(response => response.json())
-            .then((tweets) => {
-                this.setState({
-                    tweets
-                })
+        const store = this.context.store;
+
+        store.subscribe(() => {
+            this.setState({
+                tweets: store.getState()
             })
+        })
+
+        TweetsService
+            .carrega()
+            .then(tweets => {store.dispatch({ type: 'CARREGA_TWEETS', tweets });})
     }
 
     adicionaTweet = (infosDoEvento) => {
         infosDoEvento.preventDefault();
 
         if(this.state.novoTweet.length > 0) {
-            fetch(`https://twitelum-api.herokuapp.com/tweets?X-AUTH-TOKEN=${localStorage.getItem('TOKEN')}`, {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify({ conteudo: this.state.novoTweet })
-            })
-            .then((respostaDoServer) => {
-                return respostaDoServer.json()
-            })
-            .then((tweetVindoDoServidor) => {
-                console.log(tweetVindoDoServidor)
-                this.setState({
-                    tweets: [tweetVindoDoServidor, ...this.state.tweets],
-                    novoTweet: ""
+            TweetsService.adiciona(this.state.novoTweet)
+                .then((tweetVindoDoServidor) => {
+                    this.setState({
+                        tweets: [tweetVindoDoServidor, ...this.state.tweets],
+                        novoTweet: ""
+                    })
                 })
-            })
         }
     }
 
     removeTweet(idTweetQueVaiSerRemovido) {
-        console.log(idTweetQueVaiSerRemovido)
-        fetch(
-            `https://twitelum-api.herokuapp.com/tweets/${idTweetQueVaiSerRemovido}?X-AUTH-TOKEN=${localStorage.getItem('TOKEN')}`, 
-            { method: 'DELETE' })
-            .then((data) => data.json())
+        TweetsService.remove(idTweetQueVaiSerRemovido)
             .then((response) => {
                 console.log(response)
                 const listaDeTweetsAtualizada = this.state.tweets.filter( (tweet) => tweet._id !== idTweetQueVaiSerRemovido )

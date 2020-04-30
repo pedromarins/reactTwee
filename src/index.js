@@ -18,11 +18,16 @@ import Roteamento from "./routes.js";
 
 import { NotificacaoContextProvider } from './contexts/NotificacaoContext'  
 
+import store from "./store";
+import { Provider } from "react-redux";
+
 ReactDOM.render(
-    <NotificacaoContextProvider>
-        <BrowserRouter>
-            <Roteamento />
-        </BrowserRouter>
-    </NotificacaoContextProvider>
+    <Provider store={store}>
+        <NotificacaoContextProvider>
+            <BrowserRouter>
+                <Roteamento />
+            </BrowserRouter>
+        </NotificacaoContextProvider>
+    </Provider>
 , document.getElementById('root'));
 registerServiceWorker();
